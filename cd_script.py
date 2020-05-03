@@ -23,7 +23,7 @@ logger.setLevel(logging.INFO)
 
 def configure_logging():
     # create console handler and set level to info
-    ch = logging.StreamHandler()
+    ch = logging.StreamHandler() 
     ch.setLevel(logging.INFO)
 
     # create formatter
