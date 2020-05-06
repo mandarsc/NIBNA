@@ -1,6 +1,9 @@
 # Standard libraries
+import argparse
 import logging
 from os.path import join
+import pickle
+from typing import List
 
 # Libraries for graphs
 import community
@@ -163,12 +166,11 @@ def buildNodeImportanceDataFrame(G: nx.Graph, I: np.array) -> pd.DataFrame:
     return node_importance_df
           
 
-def validateTopKCodingGenes(node_importance_df: pd.DataFrame, mRNAs_data: pd.DataFrame, gold_standard_cgc: pd.Series):
+def validateTopKCodingGenes(node_importance_df: pd.DataFrame, mRNAs_data: pd.DataFrame, gold_standard_cgc: pd.Series) -> List[str]:
     """
     This function performs the following steps,
         1. Find the coding genes in the cancer network by matching the node names with those in mRNAs data
         2. Select the top-K coding genes found in the cancer network and validate them against the gold standard cgc.
-        3. Save the results to a csv file.
     Args:
         node_importance_df: Pandas dataframe containig nodes sorted in descending order of their importance
         scores.
@@ -180,18 +182,32 @@ def validateTopKCodingGenes(node_importance_df: pd.DataFrame, mRNAs_data: pd.Dat
     coding_genes = node_importance_df.loc[node_importance_df.node.isin(mRNAs_data.columns), ]
     # Select top-K coding genes and save the results to csv files
     top_k = [50, 100, 150, 200]
+    top_k_validated_coding_genes = []
     for K in top_k:
         top_k_coding_genes = coding_genes.iloc[:K, ].copy()
         # Step 2: Validate top-k coding genes against the gold standard cgc
         coding_genes_gold_standard = top_k_coding_genes.loc[top_k_coding_genes.node.isin(gold_standard_cgc)]
         logger.info("Coding genes in top-{0}: {1}".format(K, coding_genes_gold_standard.shape[0]))
         
-        # Step 3: Save the results in a csv file
-        coding_genes_gold_standard.to_csv(join(OUT_DIR, "top_{0}_coding_genes_gold_standard_validation.csv".format(K)))
+        # Store top-k validated coding genes in a list
+        top_k_validated_coding_genes.append(coding_genes_gold_standard.node.values)
+    return top_k_validated_coding_genes
           
 
 if __name__ =="__main__":
     configure_logging()
+    
+    logger.info("Initialize arg parser")
+    arg_parser = argparse.ArgumentParser()
+    arg_parser.add_argument('-n', '--num_iterations', type=int, required=True, default=10)
+    arg_parser.add_argument('-weighted', '--weighted_graph', type=int, required=True, default=0)
+    args = vars(arg_parser.parse_args())
+    n_iter = args['num_iterations']
+    weighted_graph = args['weighted_graph']
+    try:
+        isinstance(n_iter, int)
+    except:
+        raise TypeError("num_itrations argument must be int type")
     
     logger.info("Reading cancer network edge list")
     cancer_network = pd.read_csv(join(DATA_DIR, "pVal_cancer_network.csv"))
@@ -210,17 +226,39 @@ if __name__ =="__main__":
     cancer_network = computePearsonCorrelation(cancer_network, cancer_data)
      
     logger.info("Building graph from cancer network edge list")
-    G = buildGraphFromEdgeList(cancer_network)
-
-    logger.info("Partitioning graph into communities")
-    n_communities = performCommunityDetection(G)
-
-    logger.info("Computing eigenvectors from the adjacency matrix of graph G")
-    adj_eigen_vectors = computeEigenvectors(G, n_communities)
-
-    logger.info("Computing importance of nodes in the cancer network")
-    I = compute_node_importance(G.number_of_nodes(), n_communities, np.real(adj_eigen_vectors))      
-    node_importance_df = buildNodeImportanceDataFrame(G, I)
+    if weighted_graph:
+        logger.info("Building graph with pearson correlation as edge weights")
+        G = buildGraphFromEdgeList(cancer_network, is_weighted=True)
+    else:
+        G = buildGraphFromEdgeList(cancer_network)
     
-    logger.info("Validating node importance scores with gold standard cgc")
-    validateTopKCodingGenes(node_importance_df, mRNAs_df, gold_standard_cgc)
+    logger.info("Computing node importance {0} times".format(n_iter))
+    validated_coding_genes = dict()
+    num_top_k_validated_genes = np.zeros((n_iter, 4))
+    avg_num_top_k_validated_genes = np.zeros(4)
+    std_num_top_k_validated_genes = np.zeros(4)
+    
+    for i in range(n_iter):    
+        logger.info("Iteration: {0}".format(i))
+        logger.info("Partitioning graph into communities")
+        n_communities = performCommunityDetection(G)
+
+        logger.info("Computing eigenvectors from the adjacency matrix of graph G")
+        adj_eigen_vectors = computeEigenvectors(G, n_communities)
+
+        logger.info("Computing importance of nodes in the cancer network")
+        I = compute_node_importance(G.number_of_nodes(), n_communities, np.real(adj_eigen_vectors))
+        node_importance_df = buildNodeImportanceDataFrame(G, I)
+
+        logger.info("Validating node importance scores with gold standard cgc")
+        validated_coding_genes[i] = validateTopKCodingGenes(node_importance_df, mRNAs_df, gold_standard_cgc)
+       
+        for j in range(len(validated_coding_genes[i])):
+            num_top_k_validated_genes[i, j] = len(validated_coding_genes[i][j])
+            avg_num_top_k_validated_genes[j] += len(validated_coding_genes[i][j])
+    
+    num_top_k_validated_genes = pd.DataFrame(num_top_k_validated_genes, columns=['top-50', 'top-100', 'top-150', 'top-200'])
+    if weighted_graph:
+        num_top_k_validated_genes.to_csv(join(OUT_DIR, "top_k_validated_genes_weighted.csv"))
+    else:
+        num_top_k_validated_genes.to_csv(join(OUT_DIR, "top_k_validated_genes_unweighted.csv"))
