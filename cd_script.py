@@ -1,5 +1,6 @@
 # Standard libraries
 import argparse
+import datetime
 import logging
 from os.path import join
 import pickle
@@ -187,7 +188,7 @@ def validateTopKCodingGenes(node_importance_df: pd.DataFrame, mRNAs_data: pd.Dat
         top_k_coding_genes = coding_genes.iloc[:K, ].copy()
         # Step 2: Validate top-k coding genes against the gold standard cgc
         coding_genes_gold_standard = top_k_coding_genes.loc[top_k_coding_genes.node.isin(gold_standard_cgc)]
-        logger.info("Coding genes in top-{0}: {1}".format(K, coding_genes_gold_standard.shape[0]))
+#         logger.info("Coding genes in top-{0}: {1}".format(K, coding_genes_gold_standard.shape[0]))
         
         # Store top-k validated coding genes in a list
         top_k_validated_coding_genes.append(coding_genes_gold_standard.node.values)
@@ -208,6 +209,8 @@ if __name__ =="__main__":
         isinstance(n_iter, int)
     except:
         raise TypeError("num_itrations argument must be int type")
+    
+    start_time = datetime.datetime.now()
     
     logger.info("Reading cancer network edge list")
     cancer_network = pd.read_csv(join(DATA_DIR, "pVal_cancer_network.csv"))
@@ -238,6 +241,7 @@ if __name__ =="__main__":
     avg_num_top_k_validated_genes = np.zeros(4)
     std_num_top_k_validated_genes = np.zeros(4)
     
+    np.random.seed(10)
     for i in range(n_iter):    
         logger.info("Iteration: {0}".format(i))
         logger.info("Partitioning graph into communities")
@@ -262,3 +266,8 @@ if __name__ =="__main__":
         num_top_k_validated_genes.to_csv(join(OUT_DIR, "top_k_validated_genes_weighted.csv"))
     else:
         num_top_k_validated_genes.to_csv(join(OUT_DIR, "top_k_validated_genes_unweighted.csv"))
+    logger.info("Average top-K coding driver genes found")
+    logger.info("{0}".format(np.mean(num_top_k_validated_genes, axis=0).ravel()))
+    logger.info("Std top-K coding driver genes found")
+    logger.info("{0}".format(np.std(num_top_k_validated_genes, axis=0).ravel()))
+    logger.info("Experiment took {0} seconds".format((datetime.datetime.now() - start_time).seconds))
