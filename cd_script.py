@@ -241,8 +241,8 @@ if __name__ =="__main__":
     avg_num_top_k_validated_genes = np.zeros(4)
     std_num_top_k_validated_genes = np.zeros(4)
     
-    np.random.seed(10)
-    for i in range(n_iter):    
+    for i in range(n_iter):
+        np.random.seed(10)
         logger.info("Iteration: {0}".format(i))
         logger.info("Partitioning graph into communities")
         n_communities = performCommunityDetection(G)
@@ -268,6 +268,6 @@ if __name__ =="__main__":
         num_top_k_validated_genes.to_csv(join(OUT_DIR, "top_k_validated_genes_unweighted.csv"))
     logger.info("Average top-K coding driver genes found")
     logger.info("{0}".format(np.mean(num_top_k_validated_genes, axis=0).ravel()))
-    logger.info("Std top-K coding driver genes found")
+    logger.info("Standard deviation of the top-K coding driver genes found")
     logger.info("{0}".format(np.std(num_top_k_validated_genes, axis=0).ravel()))
     logger.info("Experiment took {0} seconds".format((datetime.datetime.now() - start_time).seconds))
