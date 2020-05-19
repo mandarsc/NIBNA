@@ -167,7 +167,8 @@ def buildNodeImportanceDataFrame(G: nx.Graph, I: np.array) -> pd.DataFrame:
     return node_importance_df
           
 
-def validateTopKCodingGenes(node_importance_df: pd.DataFrame, mRNAs_data: pd.DataFrame, gold_standard_cgc: pd.Series) -> List[str]:
+def validateTopKCodingGenes(node_importance_df: pd.DataFrame, mRNAs_data: pd.DataFrame, gold_standard_cgc: pd.Series,
+                           weighted: bool) -> List[str]:
     """
     This function performs the following steps,
         1. Find the coding genes in the cancer network by matching the node names with those in mRNAs data
@@ -176,7 +177,8 @@ def validateTopKCodingGenes(node_importance_df: pd.DataFrame, mRNAs_data: pd.Dat
         node_importance_df: Pandas dataframe containig nodes sorted in descending order of their importance
         scores.
         mRNAs_data: Pandas dataframe with columns containing names of coding genes.
-        gold_standard_cgc: Pandas series containing gold standard coding genes
+        gold_standard_cgc: Pandas series containing gold standard coding genes.
+        weighted: Boolean specifying whether results should be saved for weighted or unweighted graph
     """
     # Step 1: Find coding genes in the cancer network
     # Perform intersection of the nodes in the cancer network and the mRNAs
@@ -187,10 +189,17 @@ def validateTopKCodingGenes(node_importance_df: pd.DataFrame, mRNAs_data: pd.Dat
     for K in top_k:
         top_k_coding_genes = coding_genes.iloc[:K, ].copy()
         # Step 2: Validate top-k coding genes against the gold standard cgc
+        top_k_coding_genes['In CGC'] = 'No'
+        top_k_coding_genes.loc[top_k_coding_genes.node.isin(gold_standard_cgc), 'In CGC'] = 'Yes'
         coding_genes_gold_standard = top_k_coding_genes.loc[top_k_coding_genes.node.isin(gold_standard_cgc)]
-#         logger.info("Coding genes in top-{0}: {1}".format(K, coding_genes_gold_standard.shape[0]))
-        
-        # Store top-k validated coding genes in a list
+
+        # Write results to csv file
+        if weighted:
+            top_k_coding_genes.to_csv(f'Output/top_k_{K}_validated_genes_weighted.csv')
+        else:
+            top_k_coding_genes.to_csv(f'Output/top_k_{K}_validated_genes_unweighted.csv')
+            
+        # Store top-k validated coding genes in a list        
         top_k_validated_coding_genes.append(coding_genes_gold_standard.node.values)
     return top_k_validated_coding_genes
           
@@ -201,7 +210,7 @@ if __name__ =="__main__":
     logger.info("Initialize arg parser")
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument('-n', '--num_iterations', type=int, required=True, default=10)
-    arg_parser.add_argument('-weighted', '--weighted_graph', type=int, required=True, default=0)
+    arg_parser.add_argument('-weighted', '--weighted_graph', type=bool, default=False)
     args = vars(arg_parser.parse_args())
     n_iter = args['num_iterations']
     weighted_graph = args['weighted_graph']
@@ -255,7 +264,7 @@ if __name__ =="__main__":
         node_importance_df = buildNodeImportanceDataFrame(G, I)
 
         logger.info("Validating node importance scores with gold standard cgc")
-        validated_coding_genes[i] = validateTopKCodingGenes(node_importance_df, mRNAs_df, gold_standard_cgc)
+        validated_coding_genes[i] = validateTopKCodingGenes(node_importance_df, mRNAs_df, gold_standard_cgc, weighted_graph)
        
         for j in range(len(validated_coding_genes[i])):
             num_top_k_validated_genes[i, j] = len(validated_coding_genes[i][j])
