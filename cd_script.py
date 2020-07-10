@@ -27,17 +27,17 @@ logger.setLevel(logging.INFO)
 
 def configure_logging():
     # create console handler and set level to info
-    ch = logging.StreamHandler() 
-    ch.setLevel(logging.INFO)
+    logger_handler = logging.StreamHandler() 
+    logger_handler.setLevel(logging.INFO)
 
     # create formatter
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
     # add formatter to ch
-    ch.setFormatter(formatter)
+    logger_handler.setFormatter(formatter)
 
     # add ch to logger
-    logger.addHandler(ch)
+    logger.addHandler(logger_handler)
 
 
 def compute_node_importance(n_nodes, n_communities, eig_vectors):
@@ -209,7 +209,7 @@ if __name__ =="__main__":
     
     logger.info("Initialize arg parser")
     arg_parser = argparse.ArgumentParser()
-    arg_parser.add_argument('-n', '--num_iterations', type=int, required=True, default=10)
+    arg_parser.add_argument('-n', '--num_iterations', type=int, required=False, default=10)
     arg_parser.add_argument('-weighted', '--weighted_graph', type=bool, default=False)
     args = vars(arg_parser.parse_args())
     n_iter = args['num_iterations']
