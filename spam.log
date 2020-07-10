@@ -1,0 +1,14 @@
+2020-05-03 13:30:04,328 - simple_example - DEBUG - debug message
+2020-05-03 13:30:04,328 - simple_example - INFO - info message
+2020-05-03 13:30:04,328 - simple_example - WARNING - warn message
+2020-05-03 13:30:04,329 - simple_example - ERROR - error message
+2020-05-03 13:30:05,062 - simple_example - CRITICAL - critical message
+creating an instance of auxiliary_module.Auxiliary
+2020-05-03 13:31:49,827 - spam_application - INFO - creating an instance of auxiliary_module.Auxiliary
+2020-05-03 13:32:07,957 - spam_application - INFO - creating an instance of auxiliary_module.Auxiliary
+2020-05-03 13:32:07,957 - spam_application - INFO - creating an instance of auxiliary_module.Auxiliary
+2020-05-03 13:32:16,235 - spam_application - INFO - created an instance of auxiliary_module.Auxiliary
+2020-05-03 13:32:16,235 - spam_application - INFO - created an instance of auxiliary_module.Auxiliary
+2020-05-03 13:32:16,694 - spam_application - INFO - calling auxiliary_module.Auxiliary.do_something
+2020-05-03 13:32:16,694 - spam_application - INFO - calling auxiliary_module.Auxiliary.do_something
+2020-05-03 13:34:38,959 - simple_example - INFO - hey
