@@ -1,4 +1,4 @@
-## Community Detection-based Node Importance for Identifying Coding Driver Genes
+## Community Detection-based Node Importance Approach for Identifying Driver Genes
 
 This notebook contains code for identifying important nodes in the cancer network. The cancer network was built in [1]. In this work, a community detection algorithm is used to partition the cancer network into communities and a centrality-based metric is implemented to compute the importance of each node in the network [2]. Specifically, the well-known Louvain algorithm is used for detecting communities, and a centrality-based metric is used to compute the importance of each node with respect to its community. 
 
