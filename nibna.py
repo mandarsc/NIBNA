@@ -12,6 +12,7 @@ import networkx as nx
 
 # Libraries for matrix computations
 import numpy as np
+import numpy.matlib as matlib
 import pandas as pd
 
 # Libraries for sparse matrices and eigenvectors
@@ -21,6 +22,10 @@ from scipy.stats import pearsonr
 
 DATA_DIR = "/home/mandar/Data/NCSU/CBNA/cbna-community-detection/Data/"
 OUT_DIR = "/home/mandar/Data/NCSU/CBNA/cbna-community-detection/Output/"
+
+NUM_miR = 1719
+NUM_mR = 20101
+NUM_TF = 839
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -38,6 +43,23 @@ def configure_logging():
 
     # add ch to logger
     logger.addHandler(logger_handler)
+
+    
+def compute_importance_score_threshold(importance_scores):  
+    n_points = len(importance_scores)
+    all_coord = np.vstack((range(n_points), importance_scores)).T
+    np.array([range(n_points), importance_scores])
+    
+    first_point = all_coord[0]
+    line_vec = all_coord[-1] - all_coord[0]
+    line_vec_norm = line_vec / np.sqrt(np.sum(line_vec**2))
+    vec_from_first = all_coord - first_point
+    scalar_product = np.sum(vec_from_first * matlib.repmat(line_vec_norm, n_points, 1), axis=1)
+    vec_from_first_parallel = np.outer(scalar_product, line_vec_norm)
+    vec_to_line = vec_from_first - vec_from_first_parallel
+    dist_to_line = np.sqrt(np.sum(vec_to_line ** 2, axis=1))
+    idx_of_best_point = np.argmax(dist_to_line)    
+    return idx_of_best_point
 
 
 def compute_node_importance(n_nodes, n_communities, eig_vectors):
@@ -61,7 +83,7 @@ def compute_node_importance(n_nodes, n_communities, eig_vectors):
     return np.array(I)
 
 
-def computePearsonCorrelation(cancer_network: pd.DataFrame, cancer_data: pd.DataFrame) -> pd.DataFrame:
+def compute_pearson_correlation(cancer_network: pd.DataFrame, cancer_data: pd.DataFrame) -> pd.DataFrame:
     """
     This function computes pearson correlation coefficient for every pair of adjacent nodes in the cancer
     network. The correlation coefficient is stored in the `correlation` column and its absolute value is
@@ -88,7 +110,7 @@ def computePearsonCorrelation(cancer_network: pd.DataFrame, cancer_data: pd.Data
     return cancer_network
 
 
-def buildGraphFromEdgeList(cancer_network: pd.DataFrame, is_weighted=False) -> nx.Graph:
+def build_graph_from_edge_list(cancer_network: pd.DataFrame, is_weighted=False) -> nx.Graph:
     """
     This function builds a networkx graph object from the edge list. A boolean option is provided to build
     a weighted undirected graph.
@@ -108,11 +130,11 @@ def buildGraphFromEdgeList(cancer_network: pd.DataFrame, is_weighted=False) -> n
         # Build graph by reading the edge list of the cancer network
         G = nx.from_pandas_edgelist(cancer_network, source="cause", target="effect")
     logger.info("Number of nodes: {0}, and number of edges: {1}".format(len(G.nodes), len(G.edges)))
-    logger.info("Graph weights: {0}".format(G.size(weight='weight')))
+    logger.info("Graph edge weights: {0}".format(G.size(weight='weight')))
     return G
 
 
-def performCommunityDetection(G: nx.Graph) -> int:
+def perform_community_detection(G: nx.Graph) -> int:
     """
     This function performs community detection on graph G using the Louvain algorithm.
     Args:
@@ -129,7 +151,7 @@ def performCommunityDetection(G: nx.Graph) -> int:
     return n_communities
 
 
-def computeEigenvectors(G: nx.Graph, n_communities: int) -> np.ndarray:
+def compute_eigenvectors(G: nx.Graph, n_communities: int) -> np.ndarray:
     """
     This function computes the eigenvectors of the adjacency matrix. The number of eigenvectors returned 
     is specified by the n_communities integer. 
@@ -143,7 +165,7 @@ def computeEigenvectors(G: nx.Graph, n_communities: int) -> np.ndarray:
     return adj_eig_vectors
           
                   
-def buildNodeImportanceDataFrame(G: nx.Graph, I: np.array) -> pd.DataFrame:
+def build_node_importance_dataframe(G: nx.Graph, I: np.array) -> pd.DataFrame:
     """
     This function builds a dataframe containing two columns. First column contains the names of the nodes in
     graph G and second column contains their importance score. The nodes are sorted in descending order
@@ -167,8 +189,8 @@ def buildNodeImportanceDataFrame(G: nx.Graph, I: np.array) -> pd.DataFrame:
     return node_importance_df
           
 
-def validateTopKCodingGenes(node_importance_df: pd.DataFrame, mRNAs_data: pd.DataFrame, gold_standard_cgc: pd.Series,
-                           weighted: bool) -> List[str]:
+def validate_top_k_coding_genes(node_importance_df: pd.DataFrame, mRNAs_data: pd.DataFrame, gold_standard_cgc: pd.Series,
+                           k: int) -> List[str]:
     """
     This function performs the following steps,
         1. Find the coding genes in the cancer network by matching the node names with those in mRNAs data
@@ -178,30 +200,17 @@ def validateTopKCodingGenes(node_importance_df: pd.DataFrame, mRNAs_data: pd.Dat
         scores.
         mRNAs_data: Pandas dataframe with columns containing names of coding genes.
         gold_standard_cgc: Pandas series containing gold standard coding genes.
-        weighted: Boolean specifying whether results should be saved for weighted or unweighted graph
+        k: Integer specifying top-k drivers to be evaluated against gold standard.
     """
-    # Step 1: Find coding genes in the cancer network
     # Perform intersection of the nodes in the cancer network and the mRNAs
     coding_genes = node_importance_df.loc[node_importance_df.node.isin(mRNAs_data.columns), ]
-    # Select top-K coding genes and save the results to csv files
-    top_k = [50, 100, 150, 200]
-    top_k_validated_coding_genes = []
-    for K in top_k:
-        top_k_coding_genes = coding_genes.iloc[:K, ].copy()
-        # Step 2: Validate top-k coding genes against the gold standard cgc
-        top_k_coding_genes['In CGC'] = 'No'
-        top_k_coding_genes.loc[top_k_coding_genes.node.isin(gold_standard_cgc), 'In CGC'] = 'Yes'
-        coding_genes_gold_standard = top_k_coding_genes.loc[top_k_coding_genes.node.isin(gold_standard_cgc)]
-
-        # Write results to csv file
-        if weighted:
-            top_k_coding_genes.to_csv(f'Output/top_k_{K}_validated_genes_weighted.csv')
-        else:
-            top_k_coding_genes.to_csv(f'Output/top_k_{K}_validated_genes_unweighted.csv')
-            
-        # Store top-k validated coding genes in a list        
-        top_k_validated_coding_genes.append(coding_genes_gold_standard.node.values)
-    return top_k_validated_coding_genes
+    
+    # Select top-K coding genes that are present in the gold standard CGC
+    top_k_coding_genes = coding_genes.iloc[:K, ].copy()
+    top_k_coding_genes['In CGC'] = 'No'
+    top_k_coding_genes.loc[top_k_coding_genes.node.isin(gold_standard_cgc), 'In CGC'] = 'Yes'
+    validated_coding_genes_gold_standard = top_k_coding_genes.loc[top_k_coding_genes.node.isin(gold_standard_cgc)]
+    return top_k_coding_genes, validated_coding_genes_gold_standard
           
 
 if __name__ =="__main__":
@@ -220,6 +229,8 @@ if __name__ =="__main__":
         raise TypeError("num_itrations argument must be int type")
     
     start_time = datetime.datetime.now()
+    top_k = [50, 100, 150, 200]
+    top_k_validated_coding_genes = []
     
     logger.info("Reading cancer network edge list")
     cancer_network = pd.read_csv(join(DATA_DIR, "pVal_cancer_network.csv"))
@@ -231,18 +242,18 @@ if __name__ =="__main__":
     gold_standard_cgc_df = pd.read_csv(join(DATA_DIR, "Census_allFri Sep 28 07_39_37 2018.tsv"), sep="\t")
     gold_standard_cgc = gold_standard_cgc_df["Gene Symbol"]
 
-    logger.info("Reading mRNAs genes data")
+    logger.info("Reading mRNAs data")
     mRNAs_df = pd.read_csv(join(DATA_DIR, "mRNAs_data.csv"))
           
     logger.info("Computing pearson correlation coefficient")
-    cancer_network = computePearsonCorrelation(cancer_network, cancer_data)
+    cancer_network = compute_pearson_correlation(cancer_network, cancer_data)
      
     logger.info("Building graph from cancer network edge list")
     if weighted_graph:
         logger.info("Building graph with pearson correlation as edge weights")
-        G = buildGraphFromEdgeList(cancer_network, is_weighted=True)
+        G = build_graph_from_edge_list(cancer_network, is_weighted=True)
     else:
-        G = buildGraphFromEdgeList(cancer_network)
+        G = build_graph_from_edge_list(cancer_network)
     
     logger.info("Computing node importance {0} times".format(n_iter))
     validated_coding_genes = dict()
@@ -254,17 +265,26 @@ if __name__ =="__main__":
         np.random.seed(10)
         logger.info("Iteration: {0}".format(i))
         logger.info("Partitioning graph into communities")
-        n_communities = performCommunityDetection(G)
+        n_communities = perform_community_detection(G)
 
         logger.info("Computing eigenvectors from the adjacency matrix of graph G")
-        adj_eigen_vectors = computeEigenvectors(G, n_communities)
+        adj_eigen_vectors = compute_eigenvectors(G, n_communities)
 
         logger.info("Computing importance of nodes in the cancer network")
         I = compute_node_importance(G.number_of_nodes(), n_communities, np.real(adj_eigen_vectors))
-        node_importance_df = buildNodeImportanceDataFrame(G, I)
+        node_importance_df = build_node_importance_dataframe(G, I)
 
         logger.info("Validating node importance scores with gold standard cgc")
-        validated_coding_genes[i] = validateTopKCodingGenes(node_importance_df, mRNAs_df, gold_standard_cgc, weighted_graph)
+        for k in top_k:
+            top_k_coding_genes, validated_coding_genes = validate_top_k_coding_genes(node_importance_df, mRNAs_df, gold_standard_cgc, k)
+            # Write results to csv file
+            if weighted_graph:
+                top_k_coding_genes.to_csv(join('Output', f'top_k_{k}_validated_genes_weighted.csv'))
+            else:
+                top_k_coding_genes.to_csv(join('Output', f'top_k_{k}_validated_genes_unweighted.csv'))
+            top_k_validated_coding_genes.append(validated_coding_genes)
+            
+        validated_coding_genes[i] = top_k_validated_coding_genes
        
         for j in range(len(validated_coding_genes[i])):
             num_top_k_validated_genes[i, j] = len(validated_coding_genes[i][j])
