@@ -1,6 +1,8 @@
 import logging
+from os.path import join
 
 # Libraries for matrix computations
+import matplotlib.pyplot as plt
 import numpy as np
 import numpy.matlib as matlib
 
@@ -35,3 +37,32 @@ def configure_logging(logger):
 
     # add ch to logger
     logger.addHandler(logger_handler)
+    
+
+def plot_precision_recall_curves(top_k_precision: np.array, top_k_recall: np.array, top_k_f1: np.array, out_dir: str):
+    """
+    Plot precision, recall and f1 scores. The plots are stored in the out_dir.
+    Args:
+        top_k_precision: precision scores for different top-k thresholds
+        top_k_recall: recall scores for different top-k thresholds
+        top_k_f1: f1 scores for different top-k thresholds
+    """
+    plt.plot(top_k_precision, color='blue', marker='+', linestyle='-', linewidth=1)
+    plt.xlabel('Top N genes')
+    plt.ylabel('Precision according to CGC')
+    plt.title('Precision Comparison')
+    plt.savefig(join(out_dir, 'precision.jpg'))
+    plt.close()
+    plt.plot(top_k_recall, color='blue', marker='+', linestyle='-', linewidth=1)
+    plt.xlabel('Top N genes')
+    plt.ylabel('Recall according to CGC')
+    plt.title('Recall Comparison')
+    plt.savefig(join(out_dir, 'recall.jpg'))
+    plt.close()
+    plt.plot(top_k_f1, color='blue', marker='+', linestyle='-', linewidth=1)
+    plt.xlabel('Top N genes')
+    plt.ylabel('F1 Score according to CGC')
+    plt.title('F1 Score Comparison')
+    plt.savefig(join(out_dir, 'f1_score.jpg'))
+    plt.close()
+

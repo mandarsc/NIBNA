@@ -170,6 +170,24 @@ def validate_top_k_coding_genes(node_importance_df: pd.DataFrame, mRNAs_data: pd
     return top_k_coding_genes, validated_coding_genes_gold_standard
 
 
+def compute_top_k_precision_recall(node_importance_df: pd.DataFrame, mRNAs_data: pd.DataFrame, gold_standard_cgc: pd.Series,
+                           k: int = 200):
+    """
+    """
+    # Perform intersection of the nodes in the cancer network and the mRNAs
+    coding_genes = node_importance_df.loc[node_importance_df.node.isin(mRNAs_data.columns), ]
+    top_k_precision = list()
+    top_k_recall = list()
+    num_gold_standard_cgc = len(gold_standard_cgc)
+    for i in range(0, k, 3):
+        top_k_genes = coding_genes.iloc[:i, ].node.isin(gold_standard_cgc).sum()
+        top_k_precision.append(top_k_genes/(i + 1))
+        top_k_recall.append(top_k_genes/num_gold_standard_cgc)
+    top_k_precision = np.array(top_k_precision)
+    top_k_recall = np.array(top_k_recall)
+    return top_k_precision, top_k_recall
+    
+
 def nibna(G: nx.Graph):
     """
     Perform network-based node importance using community detection.
