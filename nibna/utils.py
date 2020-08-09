@@ -1,7 +1,8 @@
+import logging
+
 # Libraries for matrix computations
 import numpy as np
 import numpy.matlib as matlib
-
 
 
 def compute_importance_score_threshold(importance_scores):  
@@ -21,7 +22,7 @@ def compute_importance_score_threshold(importance_scores):
     return idx_of_best_point
 
 
-def configure_logging():
+def configure_logging(logger):
     # create console handler and set level to info
     logger_handler = logging.StreamHandler() 
     logger_handler.setLevel(logging.INFO)
