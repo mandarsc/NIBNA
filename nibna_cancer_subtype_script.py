@@ -15,7 +15,6 @@ from nibna.utils import compute_mutation_count, configure_logging, find_coding_n
 
 DATA_DIR = "/Users/mandar.chaudhary/Research Wednesday/NIBNA/Data/"
 OUT_DIR = "/Users/mandar.chaudhary/Research Wednesday/NIBNA/Output/"
-SUBTYPE_DATA_DIR = "/Users/mandar.chaudhary/Research Wednesday/CancerDriver/Data/Output/CancerSubtype"
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -44,10 +43,10 @@ if __name__ =="__main__":
         filename = subtype.lower() + '_cancer_data.csv'
         
         logger.info(f"Reading {subtype} cancer network edge list")
-        cancer_subtype_df = pd.read_csv(join(SUBTYPE_DATA_DIR, subtype, filename))
+        cancer_subtype_df = pd.read_csv(join(DATA_DIR, 'CancerSubtype', subtype, filename))
         
         logger.info(f"Reading {subtype} cancer gene expression data")
-        cancer_subtype_network = pd.read_csv(join(SUBTYPE_DATA_DIR, subtype, cancer_network_filename))
+        cancer_subtype_network = pd.read_csv(join(DATA_DIR, 'CancerSubtype', subtype, cancer_network_filename))
         logger.info('Dataframe size: {0}'.format(cancer_subtype_df.shape))
         
         logger.info("Computing pearson correlation coefficient")

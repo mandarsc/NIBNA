@@ -34,17 +34,17 @@ if __name__ =="__main__":
     top_k_validated_coding_genes = []
     
     logger.info("Reading cancer network edge list")
-    cancer_network = pd.read_csv(join(DATA_DIR, "pVal_cancer_network.csv"))
+    cancer_network = pd.read_csv(join(DATA_DIR, 'CancerDriver', 'Cancer', 'pVal_cancer_network.csv'))
 
     logger.info("Reading cancer gene expression data")
-    cancer_df = pd.read_csv(join(DATA_DIR, "cancer_data.csv"))
+    cancer_df = pd.read_csv(join(DATA_DIR, 'CancerDriver', 'Cancer', 'cancer_data.csv'))
 
     logger.info("Reading gold standard CGC data")
-    gold_standard_cgc_df = pd.read_csv(join(DATA_DIR, "Census_allFri Sep 28 07_39_37 2018.tsv"), sep="\t")
+    gold_standard_cgc_df = pd.read_csv(join(DATA_DIR, 'CancerDriver', 'Cancer', 'Census_allFri Sep 28 07_39_37 2018.tsv'), sep="\t")
     gold_standard_cgc = gold_standard_cgc_df["Gene Symbol"]
 
     logger.info("Reading mRNAs data")
-    mRNAs_df = pd.read_csv(join(DATA_DIR, "mRNAs_data.csv"))
+    mRNAs_df = pd.read_csv(join(DATA_DIR, 'CancerDriver', 'Cancer', 'mRNAs_data.csv'))
     
     protein_mutations = pd.read_csv(join(DATA_DIR, 'protein_affecting_mutations.csv'))
     mutation_subtypes = pd.read_csv(join(DATA_DIR, 'mutation_subtypes.csv'))
