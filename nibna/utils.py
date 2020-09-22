@@ -5,7 +5,6 @@ from typing import Dict, List
 # Libraries for matrix computations
 import matplotlib.pyplot as plt
 import numpy as np
-import numpy.matlib as matlib
 import pandas as pd
 
 NUM_miR = 1719
@@ -13,24 +12,10 @@ NUM_mR = 20101
 NUM_TF = 839
 
 
-def compute_importance_score_threshold(importance_scores):  
-    n_points = len(importance_scores)
-    all_coord = np.vstack((range(n_points), importance_scores)).T
-    np.array([range(n_points), importance_scores])
-    
-    first_point = all_coord[0]
-    line_vec = all_coord[-1] - all_coord[0]
-    line_vec_norm = line_vec / np.sqrt(np.sum(line_vec**2))
-    vec_from_first = all_coord - first_point
-    scalar_product = np.sum(vec_from_first * matlib.repmat(line_vec_norm, n_points, 1), axis=1)
-    vec_from_first_parallel = np.outer(scalar_product, line_vec_norm)
-    vec_to_line = vec_from_first - vec_from_first_parallel
-    dist_to_line = np.sqrt(np.sum(vec_to_line ** 2, axis=1))
-    idx_of_best_point = np.argmax(dist_to_line)    
-    return idx_of_best_point
-
-
 def configure_logging(logger):
+    """
+    This function intializes a logger to record logging statements.
+    """
     # create console handler and set level to info
     logger_handler = logging.StreamHandler() 
     logger_handler.setLevel(logging.INFO)
@@ -47,6 +32,13 @@ def configure_logging(logger):
 
 def find_coding_noncoding_drivers(critical_nodes: pd.DataFrame, protein_mutations: pd.DataFrame, miR_genes: List[str]) -> Dict[str, pd.DataFrame]:
     """
+    This function merges the critical nodes identified using NIBNA with proteins and divides them into coding and non-coding drivers.
+    Args:
+        critical_nodes (pd.DataFrame): Pandas dataframe containing critical nodes.
+        protein_mutations (pd.DataFrame): Pandas dataframe containing proteints with mutations.
+        miR_genes (List[str]): List of miRNA genes.
+    Returns:
+        Dict[str, pd.DataFrame]: Dictionary containing coding drivers with mutations, coding drivers without mutations and non-coding drivers.
     """
     cancer_drivers_dict = dict()
 
@@ -72,6 +64,13 @@ def find_coding_noncoding_drivers(critical_nodes: pd.DataFrame, protein_mutation
     
 def compute_mutation_count(coding_drivers_mutations: pd.DataFrame, mutation_subtypes:pd.DataFrame, cancer_subtype: str):
     """
+    This function computes the frequency of count of the predicted coding drivers with mutations and selects the gene with the highest frequency.
+    Args:
+        coding_drivers_mutations(pd.DatFrame): Pandas dataframe containing predicted coding drivers with mutations.
+        mutation_subtype (pd.DataFrame): Pandas dataframe containing mutation subtypes.
+        cancer_subtype (str): String specifying the cancer subtype.
+    Returns:
+        Pandas dataframe containing coding drivers with mutations having the highest frequency count for the given cancer subtype.
     """
     subtype_mutation = []
 
@@ -89,6 +88,12 @@ def compute_mutation_count(coding_drivers_mutations: pd.DataFrame, mutation_subt
     
 def plot_node_importance(node_importance: np.array, threshold: int, network_name: str, out_dir: str):
     """
+    Plot node importance scores of genes and save it in specified directory.
+    Args:
+        node_importance (np.array): Numpy array containing node importance scores in decrasing order.
+        threshold (int): Integer specifying last node with importance score greater than the threshold value.
+        network_name (str): String specifying the condition-specific network for which node importance is computed.
+        out_dir (str): String specifying output directory to save the plot.
     """
     plt.scatter(np.arange(len(node_importance)), node_importance, marker='o', linestyle='-', color='blue')
     plt.xlabel('Genes')
