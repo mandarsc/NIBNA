@@ -65,8 +65,9 @@ if __name__ =="__main__":
     logger.info(f'Node importance threshold: {threshold_value}, threshold: {node_threshold}')
 
     critical_nodes = node_importance_df.iloc[:node_threshold].copy()
-    critical_nodes.to_csv(join(OUT_DIR, 'critical_nodes.csv'))
-    plot_node_importance(node_importance_df.importance.to_numpy(), node_threshold, 'cancer', OUT_DIR)
+    critical_nodes.to_csv(join(OUT_DIR, 'CancerDriver', 'Cancer','critical_nodes.csv'))
+    plot_node_importance(node_importance_df.importance.to_numpy(), node_threshold, 'cancer', join(OUT_DIR, 
+                                                                                                  'CancerDriver', 'Cancer'))
 
     logger.info('Identifying coding drivers with mutations, coding drivers without mutations and non-coding drivers')
     cancer_drivers_dict = find_coding_noncoding_drivers(critical_nodes, protein_mutations,
