@@ -18,6 +18,10 @@ logger.setLevel(logging.INFO)
 
 configure_logging(logger)
 
+NUM_miR = 1719
+NUM_mR = 20101
+NUM_TF = 839
+
 
 def compute_node_importance(n_nodes, n_communities, eig_vectors):
     """
@@ -147,7 +151,7 @@ def build_node_importance_dataframe(G: nx.Graph, I: np.array) -> pd.DataFrame:
           
 
 def validate_top_k_coding_genes(node_importance_df: pd.DataFrame, mRNAs_data: pd.DataFrame, gold_standard_cgc: pd.Series,
-                           k: int) -> List[str]:
+                                k: int) -> List[str]:
     """
     This function performs the following steps,
         1. Find the coding genes in the cancer network by matching the node names with those in mRNAs data
@@ -159,6 +163,7 @@ def validate_top_k_coding_genes(node_importance_df: pd.DataFrame, mRNAs_data: pd
         gold_standard_cgc: Pandas series containing gold standard coding genes.
         k: Integer specifying top-k drivers to be evaluated against gold standard.
     """
+    
     # Perform intersection of the nodes in the cancer network and the mRNAs
     coding_genes = node_importance_df.loc[node_importance_df.node.isin(mRNAs_data.columns), ]
     
@@ -166,20 +171,26 @@ def validate_top_k_coding_genes(node_importance_df: pd.DataFrame, mRNAs_data: pd
     top_k_coding_genes = coding_genes.iloc[:k, ].copy()
     top_k_coding_genes['In CGC'] = 'No'
     top_k_coding_genes.loc[top_k_coding_genes.node.isin(gold_standard_cgc), 'In CGC'] = 'Yes'
-    validated_coding_genes_gold_standard = top_k_coding_genes.loc[top_k_coding_genes.node.isin(gold_standard_cgc)]
-    return top_k_coding_genes, validated_coding_genes_gold_standard
+    return top_k_coding_genes
 
 
-def compute_top_k_precision_recall(node_importance_df: pd.DataFrame, mRNAs_data: pd.DataFrame, gold_standard_cgc: pd.Series,
+def compute_top_k_precision_recall(node_importance_df: pd.DataFrame, mRNAs_df: pd.DataFrame, gold_standard_cgc: pd.Series,
                            k: int = 200):
     """
+    Compute precision and recall of the estimated cancer drivers for different thresholds.
+    Args:
+        node_importance_df (pd.DataFrame): Pandas dataframe containing nodes and their importance score.
+        mRNAs_df (pd.DataFrame): Pandas dataframe with column names containing names of mRNAs.
+        gold_standard_cgc (pd.Series): Pandas series containing name of gold standard genes affecting breast cancer.
+    Returns:
+        Tuple(np.array, np.array): Tuple of two numpy arrays containing precision and recall scores.
     """
     # Perform intersection of the nodes in the cancer network and the mRNAs
-    coding_genes = node_importance_df.loc[node_importance_df.node.isin(mRNAs_data.columns), ]
+    coding_genes = node_importance_df.loc[node_importance_df.node.isin(mRNAs_df.columns), ]
     top_k_precision = list()
     top_k_recall = list()
     num_gold_standard_cgc = len(gold_standard_cgc)
-    for i in range(0, k, 3):
+    for i in range(0, k):
         top_k_genes = coding_genes.iloc[:i, ].node.isin(gold_standard_cgc).sum()
         top_k_precision.append(top_k_genes/(i + 1))
         top_k_recall.append(top_k_genes/num_gold_standard_cgc)
@@ -196,6 +207,7 @@ def nibna(G: nx.Graph):
     Returns:
         pd.DataFrame: Dataframe containing importance of nodes in the network.
     """
+    np.random.seed(10)
     logger.info("Partitioning graph into communities")
     n_communities = perform_community_detection(G)
 
