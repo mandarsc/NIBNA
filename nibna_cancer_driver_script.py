@@ -36,7 +36,7 @@ if __name__ =="__main__":
     logger.info("Reading cancer network edge list")
     cancer_network = pd.read_csv(join(DATA_DIR, "pVal_cancer_network.csv"))
 
-    logger.info("Reading cancer genes expression data")
+    logger.info("Reading cancer gene expression data")
     cancer_df = pd.read_csv(join(DATA_DIR, "cancer_data.csv"))
 
     logger.info("Reading gold standard CGC data")

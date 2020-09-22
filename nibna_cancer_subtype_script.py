@@ -46,7 +46,7 @@ if __name__ =="__main__":
         logger.info(f"Reading {subtype} cancer network edge list")
         cancer_subtype_df = pd.read_csv(join(SUBTYPE_DATA_DIR, subtype, filename))
         
-        logger.info(f"Reading {subtype} cancer genes expression data")
+        logger.info(f"Reading {subtype} cancer gene expression data")
         cancer_subtype_network = pd.read_csv(join(SUBTYPE_DATA_DIR, subtype, cancer_network_filename))
         logger.info('Dataframe size: {0}'.format(cancer_subtype_df.shape))
         
