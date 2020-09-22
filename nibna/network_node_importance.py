@@ -18,10 +18,6 @@ logger.setLevel(logging.INFO)
 
 configure_logging(logger)
 
-NUM_miR = 1719
-NUM_mR = 20101
-NUM_TF = 839
-
 
 def compute_node_importance(n_nodes, n_communities, eig_vectors):
     """
