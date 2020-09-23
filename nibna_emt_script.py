@@ -61,6 +61,12 @@ if __name__ =="__main__":
     validated_noncoding_candidate_drivers_mes = set(critical_nodes.node[:K]).intersection(noncoding_gold_standard_mes_df.V1)
     logger.info(f'Number of validated noncoding candidate drivers in top-{K} predicted drivers: {len(validated_noncoding_candidate_drivers_mes)}')
     
+    top_20_coding_drivers = critical_nodes.loc[critical_nodes.Type=="coding"].iloc[:20, :]
+    top_20_noncoding_drivers = critical_nodes.loc[critical_nodes.Type=="non-coding"].iloc[:20, :]
+    
+    top_20_coding_drivers.to_csv(join(OUT_DIR, 'EMT', 'Mes', 'top_20_coding_drives.csv'))
+    top_20_noncoding_drivers.to_csv(join(OUT_DIR, 'EMT', 'Mes', 'top_20_non_coding_drives.csv'))
+    
     # Calculate p_value
     # Coding
     # Mes

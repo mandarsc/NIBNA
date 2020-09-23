@@ -1,10 +1,14 @@
 from collections import defaultdict
+import logging
 from os.path import join
 
 import pandas as pd
 
-from nibna.utils import add_genes_as_columns, get_top_20_drivers, get_top_drivers_enriched_terms, get_unique_genes, process_go_data
+from nibna.utils import add_genes_as_columns, get_top_20_drivers, get_top_drivers_enriched_terms, get_unique_genes, plot_heatmap, process_go_data, DATA_DIR, OUT_DIR
 
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 OUT_DIR = "/Users/mandar.chaudhary/Research Wednesday/NIBNA/Output/"
 
@@ -36,5 +40,5 @@ if __name__ == "__main__":
     molecular_10_enriched_terms[['enriched_terms', 'Term']].to_csv(join(OUT_DIR, 'CancerDriver', 'Cancer',
                                                                     'molecular_enriched_terms.csv'))
     
-    plot_heatmap(go_bio_terms)
-    plot_heatmap(go_mol_terms, go_process = "GO Molecular Function")
+    plot_heatmap(go_bio_terms, out_dir = join(OUT_DIR, 'CancerDriver', 'Cancer'))
+    plot_heatmap(go_mol_terms, out_dir = join(OUT_DIR, 'CancerDriver', 'Cancer'), go_process = "GO Molecular Function")
