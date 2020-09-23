@@ -11,10 +11,8 @@ from scipy.stats import hypergeom
 
 # Import functions from nibna module
 from nibna.network_node_importance import build_graph_from_edge_list, compute_pearson_correlation, nibna
-from nibna.utils import compute_mutation_count, configure_logging, find_coding_noncoding_drivers, NUM_miR
+from nibna.utils import compute_mutation_count, configure_logging, find_coding_noncoding_drivers, DATA_DIR, OUT_DIR, NUM_miR
 
-DATA_DIR = "/Users/mandar.chaudhary/Research Wednesday/NIBNA/Data/"
-OUT_DIR = "/Users/mandar.chaudhary/Research Wednesday/NIBNA/Output/"
 K = 100
     
 logger = logging.getLogger(__name__)

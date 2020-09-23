@@ -14,13 +14,11 @@ import pandas as pd
 
 # Import functions from nibna module
 from nibna.network_node_importance import build_graph_from_edge_list, compute_pearson_correlation, compute_top_k_precision_recall, nibna, validate_top_k_coding_genes
-from nibna.utils import configure_logging, find_coding_noncoding_drivers, plot_node_importance, plot_precision_recall_curves, NUM_miR
+from nibna.utils import configure_logging, find_coding_noncoding_drivers, plot_node_importance, plot_precision_recall_curves, DATA_DIR, OUT_DIR, NUM_miR
 
 # DATA_DIR = "/home/mandar/Data/NCSU/CBNA/cbna-community-detection/Data/"
 # OUT_DIR = "/home/mandar/Data/NCSU/CBNA/cbna-community-detection/Output/"
 
-DATA_DIR = "/Users/mandar.chaudhary/Research Wednesday/NIBNA/Data/"
-OUT_DIR = "/Users/mandar.chaudhary/Research Wednesday/NIBNA/Output/"
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
