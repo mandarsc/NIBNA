@@ -48,6 +48,9 @@ if __name__ =="__main__":
     
     protein_mutations = pd.read_csv(join(DATA_DIR, 'protein_affecting_mutations.csv'))
     mutation_subtypes = pd.read_csv(join(DATA_DIR, 'mutation_subtypes.csv'))
+    
+    logger.info('Reading OncomiR drivers associated with tumorigenesis of BRCA')
+    oncomir_mirna_drivers = pd.read_csv(join(DATA_DIR, 'OncomiR_miRNA_drivers.csv'))
           
     logger.info("Computing pearson correlation coefficient")
     cancer_network = compute_pearson_correlation(cancer_network, cancer_df)
@@ -73,9 +76,6 @@ if __name__ =="__main__":
     cancer_drivers_dict = find_coding_noncoding_drivers(critical_nodes, protein_mutations,
                                                             cancer_df.columns[:NUM_miR])
     
-    cancer_drivers_dict['coding_drivers_mutations'].to_csv(join(OUT_DIR, 'CancerDriver', 'Cancer', 'coding_candidate_drivers_mutations.csv'))
-    cancer_drivers_dict['coding_drivers_no_mutations'].to_csv(join(OUT_DIR, 'CancerDriver', 'Cancer', 'coding_candidate_drivers_no_mutations.csv'))
-    cancer_drivers_dict['noncoding_drivers'].to_csv(join(OUT_DIR, 'CancerDriver', 'Cancer', 'noncoding_candidate_drivers.csv'))    
     logger.info("Validating node importance scores with gold standard cgc")
     for k in top_k:
         top_k_coding_genes = validate_top_k_coding_genes(cancer_drivers_dict['coding_drivers_mutations'], mRNAs_df,
@@ -98,4 +98,18 @@ if __name__ =="__main__":
 
     logger.info("Number of top-K coding driver genes found")
     logger.info("{0}".format(num_top_k_validated_genes))
+
+    logger.info('Validating non-coding drivers with OncomiR cancer drivers')
+    noncoding_candidate_cancer_drivers = cancer_drivers_dict['noncoding_drivers']
+    noncoding_candidate_cancer_drivers['In OncomiR'] = 'No'
+
+    noncoding_candidate_cancer_drivers.loc[noncoding_candidate_cancer_drivers.node.isin(oncomir_mirna_drivers.iloc[:, 0]),
+                                      'In OncomiR'] = 'Yes'
+    logger.info(f"Non-coding drivers validated using OncomiR {(noncoding_candidate_cancer_drivers['In OncomiR']=='Yes').sum()}")
+    
+    cancer_drivers_dict['coding_drivers_mutations'].to_csv(join(OUT_DIR, 'CancerDriver', 'Cancer', 'coding_candidate_drivers_mutations.csv'))
+    cancer_drivers_dict['coding_drivers_no_mutations'].to_csv(join(OUT_DIR, 'CancerDriver', 'Cancer', 'coding_candidate_drivers_no_mutations.csv'))
+    noncoding_candidate_cancer_drivers.to_csv(join(OUT_DIR, 'CancerDriver', 'Cancer', 'noncoding_candidate_drivers.csv'))    
+
+
     logger.info("Experiment took {0} seconds".format((datetime.datetime.now() - start_time).seconds))

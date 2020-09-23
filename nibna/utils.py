@@ -30,6 +30,50 @@ def configure_logging(logger):
     logger.addHandler(logger_handler)
     
 
+def process_go_data(go_df: pd.DataFrame) -> pd.DataFrame:
+    go_enriched_terms_df = go_df.iloc[:10].copy()
+    go_enriched_terms_df['genes_split'] = go_enriched_terms_df.Genes.apply(lambda x: x.split(';'))
+    go_enriched_terms_df['enriched_terms'] = go_enriched_terms_df.Term.str.extract(r'\(([^)]+)')
+    return go_enriched_terms_df
+
+
+def get_top_20_drivers(enriched_terms_df: pd.DataFrame) -> List[str]:
+    gene_count_dict = defaultdict(int)
+    for gene_list in enriched_terms_df.genes_split:
+        for gene in gene_list:
+            gene_count_dict[gene] += 1
+
+    gene_count_df = pd.DataFrame.from_dict(gene_count_dict, orient='index')
+    gene_count_df = gene_count_df.reset_index()
+    gene_count_df.columns = ['gene', 'count']
+    gene_count_df = gene_count_df.sort_values(by='count', ascending=False)
+    top_20_drivers = gene_count_df.gene.head(n=20).tolist()
+    return top_20_drivers
+
+
+def get_unique_genes(enriched_terms_df: pd.DataFrame):
+    unique_genes_per_term = enriched_terms_df.genes_split.apply(lambda x: set(x))
+    unique_genes = set()
+    for genes in unique_genes_per_term:
+        unique_genes = unique_genes.union(genes)
+    return unique_genes
+
+
+def add_genes_as_columns(genes, df):
+    for gene in genes:
+        df[gene] = 0
+        gene_in_encriched_term = df.genes_split.apply(lambda x: gene in x)
+        df.loc[gene_in_encriched_term, gene] = 1
+
+        
+def get_top_drivers_enriched_terms(df, top_20_drivers):
+    go_terms = df[['enriched_terms'] + top_20_drivers].T.copy()
+    go_terms.columns = go_terms.iloc[0]
+    go_terms = go_terms.drop('enriched_terms', axis=0)
+    go_terms = go_terms.astype('int')
+    return go_terms
+    
+    
 def find_coding_noncoding_drivers(critical_nodes: pd.DataFrame, protein_mutations: pd.DataFrame, miR_genes: List[str]) -> Dict[str, pd.DataFrame]:
     """
     This function merges the critical nodes identified using NIBNA with proteins and divides them into coding and non-coding drivers.
@@ -129,4 +173,18 @@ def plot_precision_recall_curves(top_k_precision: np.array, top_k_recall: np.arr
     plt.ylabel('F1 Score according to CGC')
     plt.title('F1 Score Comparison')
     plt.savefig(join(out_dir, 'f1_score.jpg'))
+    plt.close()
+
+
+def plot_heatmap(go_terms: pd.DataFrame, out_dir: str, go_process: str = "GO Biological Process"):
+    rcParams['figure.figsize'] = 10, 7
+    sns.heatmap(go_terms, cmap="Blues", linewidths=1, linecolor='black', cbar=False, vmin=0, vmax=1)
+    plt.xlabel('Enriched Terms', fontsize=18)
+    plt.ylabel('Predicted Cancer Drivers', fontsize=18)
+    plt.xticks(fontsize=14)
+    plt.yticks(fontsize=14)
+    plt.xticks(rotation=-60)
+    plt.title(go_process, fontsize=20)
+    plt.tight_layout()
+    plt.savefig(join(out_dir, go_process + ' Heatmap.jpg'), bbox_inches = "tight")
     plt.close()

@@ -73,10 +73,12 @@ if __name__ =="__main__":
 
         coding_candidate_cancer_drivers_mutations = compute_mutation_count(cancer_drivers_dict['coding_drivers_mutations'],
                                                                           mutation_subtypes, subtype)
+       
         logger.info(f"Coding candidate drivers with mutations: {len(cancer_drivers_dict['coding_drivers_mutations'])}")
         logger.info(f"Coding candidate drivers without mutations: {len(cancer_drivers_dict['coding_drivers_no_mutations'])}")
         logger.info(f"Non-coding candidate drivers without mutations: {len(cancer_drivers_dict['noncoding_drivers'])}")
 
+                     
         coding_candidate_cancer_drivers_mutations.to_csv(join(OUT_DIR, 'CancerSubtype', subtype, 'coding_candidate_drivers_mutations.csv'))
         cancer_drivers_dict['coding_drivers_no_mutations'].to_csv(join(OUT_DIR, 'CancerSubtype', subtype, 'coding_candidate_drivers_no_mutations.csv'))
         cancer_drivers_dict['noncoding_drivers'].to_csv(join(OUT_DIR, 'CancerSubtype', subtype, 'noncoding_candidate_drivers.csv'))
