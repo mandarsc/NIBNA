@@ -1,6 +1,6 @@
 import logging
 from os.path import join
-from typing import Dict, List
+from typing import Dict, List, Set
 
 # Libraries for matrix computations
 import matplotlib.pyplot as plt
@@ -10,6 +10,9 @@ import pandas as pd
 NUM_miR = 1719
 NUM_mR = 20101
 NUM_TF = 839
+
+DATA_DIR = "/Users/mandar.chaudhary/Research Wednesday/NIBNA/Data/"
+OUT_DIR = "/Users/mandar.chaudhary/Research Wednesday/NIBNA/Output/"
 
 
 def configure_logging(logger):
@@ -31,6 +34,13 @@ def configure_logging(logger):
     
 
 def process_go_data(go_df: pd.DataFrame) -> pd.DataFrame:
+    """
+    This function parses the enrichment profiles data downloaded from https://maayanlab.cloud/Enrichr/
+    Args:
+        go_df (pd.DataFrame): Pandas dataframe containing enrichment profiles.
+    Returns:
+        pd.DataFrame: Pandas dataframe containing processed enrichment profiles data.
+    """
     go_enriched_terms_df = go_df.iloc[:10].copy()
     go_enriched_terms_df['genes_split'] = go_enriched_terms_df.Genes.apply(lambda x: x.split(';'))
     go_enriched_terms_df['enriched_terms'] = go_enriched_terms_df.Term.str.extract(r'\(([^)]+)')
@@ -38,6 +48,13 @@ def process_go_data(go_df: pd.DataFrame) -> pd.DataFrame:
 
 
 def get_top_20_drivers(enriched_terms_df: pd.DataFrame) -> List[str]:
+    """
+    This function retrieves top-20 drivers in top-10 enrichment terms.
+    Args:
+        enriched_terms_df (pd.DataFrame): Pandas dataframe containing enriched terms.
+    Returns:
+        pd.DataFrame: Pandas dataframe top-20 genes with highest frequency.
+    """
     gene_count_dict = defaultdict(int)
     for gene_list in enriched_terms_df.genes_split:
         for gene in gene_list:
@@ -51,7 +68,14 @@ def get_top_20_drivers(enriched_terms_df: pd.DataFrame) -> List[str]:
     return top_20_drivers
 
 
-def get_unique_genes(enriched_terms_df: pd.DataFrame):
+def get_unique_genes(enriched_terms_df: pd.DataFrame) -> Set[str]:
+    """
+    This function finds the unique genes present in the enricheed terms.
+    Args:
+        enriched_terms_df (pd.DataFrame): Pandas dataframe containing enriched terms.
+    Returns:
+        Set[str]: Set of strings containing names of unique genes.
+    """
     unique_genes_per_term = enriched_terms_df.genes_split.apply(lambda x: set(x))
     unique_genes = set()
     for genes in unique_genes_per_term:
@@ -60,13 +84,29 @@ def get_unique_genes(enriched_terms_df: pd.DataFrame):
 
 
 def add_genes_as_columns(genes, df):
+    """
+    This function adds a column for a gene present in the enriched term and assigns 1 if the gene is present otherwise 0.
+    Args:
+        genes (Set[str]): Set of strings containing names of genes.
+        df (pd.DataFrame): Pandas dataframe enriched terms and the corresponding list of genes.
+    Returns:
+        pd.DataFrame: Pandas dataframe containing a column with a gene name. The rows correspond to enriched term and a value of 1 in a column indicates the gene is present in the enriched term.
+    """
     for gene in genes:
         df[gene] = 0
         gene_in_encriched_term = df.genes_split.apply(lambda x: gene in x)
         df.loc[gene_in_encriched_term, gene] = 1
 
         
-def get_top_drivers_enriched_terms(df, top_20_drivers):
+def get_top_drivers_enriched_terms(df, top_20_drivers) -> pd.DataFrame:
+    """
+    This function creates a dataframe with genes as rows and enriched terms as columns. All the values in the dataframe have intereger types.
+    Args:
+        df (pd.DataFrame): Pandas dataframe containing enriched terms as rows and gene names as columns.
+        top_20_drivers (List[str]): List of strings containing top-20 frequent drivers.
+    Returns:
+        pd.DataFrame: Pandas dataframe with top-20 driver genes as rows and enriched terms as columns.
+    """
     go_terms = df[['enriched_terms'] + top_20_drivers].T.copy()
     go_terms.columns = go_terms.iloc[0]
     go_terms = go_terms.drop('enriched_terms', axis=0)
@@ -177,6 +217,13 @@ def plot_precision_recall_curves(top_k_precision: np.array, top_k_recall: np.arr
 
 
 def plot_heatmap(go_terms: pd.DataFrame, out_dir: str, go_process: str = "GO Biological Process"):
+    """
+    This function creates a heatmap for the GO enirchment profiles.
+    Args:
+        go_terms (pd.DataFrame): Pandas dataframe containing top-20 drivers as rows and enriched terms as columns.
+        out_dir (str): String specifying directory to store the heatmap.
+        go_process (str): String specifying either GO Biological Process of GO Molecular function as plot title.
+    """
     rcParams['figure.figsize'] = 10, 7
     sns.heatmap(go_terms, cmap="Blues", linewidths=1, linecolor='black', cbar=False, vmin=0, vmax=1)
     plt.xlabel('Enriched Terms', fontsize=18)
