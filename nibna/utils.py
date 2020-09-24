@@ -202,6 +202,8 @@ def plot_precision_recall_curves(top_k_precision: np.array, top_k_recall: np.arr
     plt.plot(top_k_precision, color='blue', marker='+', linestyle='-', linewidth=1)
     plt.xlabel('Top N genes')
     plt.ylabel('Precision according to CGC')
+    plt.ylim([0, 1.1])
+    plt.yticks(np.arange(0, 1.1, 0.2))
     plt.title('Precision Comparison')
     plt.savefig(join(out_dir, 'precision.jpg'))
     plt.close()

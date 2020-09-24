@@ -187,7 +187,7 @@ def compute_top_k_precision_recall(node_importance_df: pd.DataFrame, mRNAs_df: p
     top_k_recall = list()
     num_gold_standard_cgc = len(gold_standard_cgc)
     for i in range(0, k):
-        top_k_genes = coding_genes.iloc[:i, ].node.isin(gold_standard_cgc).sum()
+        top_k_genes = coding_genes.iloc[:(i + 1), ].node.isin(gold_standard_cgc).sum()
         top_k_precision.append(top_k_genes/(i + 1))
         top_k_recall.append(top_k_genes/num_gold_standard_cgc)
     top_k_precision = np.array(top_k_precision)
