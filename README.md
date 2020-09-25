@@ -15,7 +15,7 @@ The following are the main steps involved in computing node importance,
 python3 nibna_cancer_driver_script.py
 ```
 The script will load all the input data files and output results under the `NIBNA/Output/CancerDriver/Cancer/` directory. The list of files created by the script are as follows,
-1. critical_nodes.csv contains list of all predicted cancer drivers.
+1. `critical_nodes.csv` contains list of all predicted cancer drivers.
 2. cancer_node_importance.jpg contains a plot showing the distribution of node importance scores.
 3. top_k_50_validated_genes.csv contains top-50 predicted coding cancer drivers. Similarly, the remaining file names with same name convention contain predicted cancer drivers for different values of threshold.
 4. top_k_validated_genes_weighted.csv contains the number of predicted coding drivers validated using CGC.
