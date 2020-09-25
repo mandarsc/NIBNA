@@ -10,21 +10,47 @@ The following are the main steps involved in computing node importance,
 5. Sort the coding genes in the cancer network in descending order of their importance score.
 
 ## Steps to run experiments
-1. ### Identify critical nodes in the cancer network: Run the script `nibna_cancer_driver_script.py` to obtain the list of predicted coding drivers with mutations, coding drivers without mutations and non-coding drivers in the cancer network.
+
+### Prerequisite
+Make sure you have `python3` installed on your machine before running the experiments.
+
+1. ### Identify critical nodes in the cancer network: Execute the script `nibna_cancer_driver_script.py` to obtain the list of predicted coding drivers with mutations, coding drivers without mutations and non-coding drivers in the cancer network.
 ```
 python3 nibna_cancer_driver_script.py
 ```
 The script will load all the input data files and output results under the `NIBNA/Output/CancerDriver/Cancer/` directory. The list of files created by the script are as follows,
 1. `critical_nodes.csv` contains list of all predicted cancer drivers.
-2. cancer_node_importance.jpg contains a plot showing the distribution of node importance scores.
-3. top_k_50_validated_genes.csv contains top-50 predicted coding cancer drivers. Similarly, the remaining file names with same name convention contain predicted cancer drivers for different values of threshold.
-4. top_k_validated_genes_weighted.csv contains the number of predicted coding drivers validated using CGC.
-5. coding_candidate_drivers_mutations.csv contains list of predicted coding drivers with mutations.
-6. coding_candidate_drivers_no_mutations.csv contains list of predicted coding drivers without mutations.
-7. noncoding_candidate_drivers.csv contains list of predicted non-coding drivers.
-8. performance_metrics.csv contains precision, recall and f1-score of the predicted coding cancer drivers.
+2. `cancer_node_importance.jpg` contains a plot showing the distribution of node importance scores.
+3. `top_k_50_validated_genes.csv` contains top-50 predicted coding cancer drivers. Similarly, the remaining file names with same name convention contain predicted cancer drivers for different values of threshold.
+4. `top_k_validated_genes_weighted.csv` contains the number of predicted coding drivers validated using CGC.
+5. `coding_candidate_drivers_mutations.csv` contains list of predicted coding drivers with mutations.
+6. `coding_candidate_drivers_no_mutations.csv` contains list of predicted coding drivers without mutations.
+7. `noncoding_candidate_drivers.csv` contains list of predicted non-coding drivers.
+8. `performance_metrics.csv` contains precision, recall and f1-score of the predicted coding cancer drivers.
 
 The results are saved in a csv file saved in `Output` directory where each row indicates the number of top-k coding genes found by this approach.
+
+2. ### Cancer subtype analysis: Execute the script `nibna_cancer_subtype_script.py` to obtain list of predicted cancer drivers for each cancer subtype.
+```
+python3 nibna_cancer_subtype_script.py
+```
+The script will read the subtype-specific datasets and output the following files to the `NIBNA/Output/CancerSubtype/{subtype_name}/` folder.
+1. `critical_nodes.csv` contains list of all predicted cancer drivers.
+2. `coding_candidate_drivers_mutations.csv` contains list of predicted coding drivers with mutations.
+3. `coding_candidate_drivers_no_mutations.csv` contains list of predicted coding drivers without mutations.
+4. `noncoding_candidate_drivers.csv` contains list of predicted non-coding drivers.
+5. `coding_candidate_drivers_no_mutations_no_overlap.csv` contains list of predicted coding drivers without mutations which are only specific to the subtype.
+6. `noncoding_candidate_drivers_no_overlap.csv` contains list of predicted non-coding drivers which are only specific to the subtype.
+
+3. ### EMT analysis: Execute the script `nibna_emt_script.py` to obtain the list of critical nodes in EMT analysis.
+```
+python3 nibna_emt_script.py
+```
+The script will output results under the `NIBNA/Output/EMT/Mes/` folder,
+1. `critical_nodes.csv` contains list of all predicted cancer drivers.
+2. `top_20_coding_drivers.csv` contains list of top-20 predicted coding drivers.
+3. `top_20_non_coding_drivers.csv` contains list of top-20 non-coding drivers.
+
 
 ### References:
 1. [Pham, Vu VH, Lin Liu, Cameron P. Bracken, Gregory J. Goodall, Qi Long, Jiuyong Li, and Thuc D. Le. "CBNA: A control theory based method for identifying coding and non-coding cancer drivers." PLoS Computational Biology 15, no. 12 (2019).](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1007538#sec009)
