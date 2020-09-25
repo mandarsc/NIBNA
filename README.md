@@ -1,25 +1,28 @@
-## Community Detection-based Node Importance Approach for Identifying Driver Genes
+## Network-based Node Importance Approach for Identifying Cancer Driver Genes
 
-This notebook contains code for identifying important nodes in the cancer network. The cancer network was built in [1]. In this work, a community detection algorithm is used to partition the cancer network into communities and a centrality-based metric is implemented to compute the importance of each node in the network [2]. Specifically, the well-known Louvain algorithm is used for detecting communities, and a centrality-based metric is used to compute the importance of each node with respect to its community. 
+This repository contains code for identifying driver genes in the cancer network. In this work, a community detection algorithm is used to partition the cancer network into communities and a centrality-based metric is implemented to compute the importance of each node in the network [2]. Specifically, the well-known Louvain algorithm is used for detecting communities, and a centrality-based metric is used to compute node importance by measuring the distortion in the community structure upon the node's removal from the network. 
 
-The following steps are performed to compute the node importance and validate the important nodes,
-1. Build an undirected graph G using the edge list of the cancer network.
+The following are the main steps involved in computing node importance,
+1. Build a undirected weighted graph G using the edge list of the cancer network.
 2. Partition the graph into communities using the Louvain algorithm.
 3. Compute eigenvectors of the adjancency matrix of graph G.
 4. Compute node importance of each node in graph G using a centrality-based metric.
 5. Sort the coding genes in the cancer network in descending order of their importance score.
-6. Validate the coding genes with gold standard CGC.
 
 ## Steps to run experiments
-In order to run experiments, there are two command line arguments that must be specified. The first argument specifies the number of times community detection must be performed and node importance to be computed. This step has been added since community detection is non-deterministic and therefore performing iterations of this step will provide some variance of the results. The second argument indicates whether an unweighted or weighted graph should be used for detecting communities.
-
-The following command runs community detection and node importance 10 times on a weighted graph.
-
-`python3 cd_script.py -n 10 -weighted 1`
-
-To run experiments on an unweighted graph, you can specify the `weighted` argument to 0.
-
-`python3 cd_script.py -n 10 -weighted 0`
+1. ## Identify critical nodes in the cancer network: Run the script `nibna_cancer_driver_script.py` to obtain the list of predicted coding drivers with mutations, coding drivers without mutations and non-coding drivers in the cancer network.
+```
+python3 nibna_cancer_driver_script.py
+```
+The script will load all the input data files and output results under the `NIBNA/Output/CancerDriver/Cancer/` directory. The list of files created by the script are as follows,
+1. critical_nodes.csv contains list of all predicted cancer drivers.
+2. cancer_node_importance.jpg contains a plot showing the distribution of node importance scores.
+3. top_k_50_validated_genes.csv contains top-50 predicted coding cancer drivers. Similarly, the remaining file names with same name convention contain predicted cancer drivers for different values of threshold.
+4. top_k_validated_genes_weighted.csv contains the number of predicted coding drivers validated using CGC.
+5. coding_candidate_drivers_mutations.csv contains list of predicted coding drivers with mutations.
+6. coding_candidate_drivers_no_mutations.csv contains list of predicted coding drivers without mutations.
+7. noncoding_candidate_drivers.csv contains list of predicted non-coding drivers.
+8. performance_metrics.csv contains precision, recall and f1-score of the predicted coding cancer drivers.
 
 The results are saved in a csv file saved in `Output` directory where each row indicates the number of top-k coding genes found by this approach.
 
