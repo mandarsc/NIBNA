@@ -10,7 +10,7 @@ The following are the main steps involved in computing node importance,
 5. Sort the coding genes in the cancer network in descending order of their importance score.
 
 ## Steps to run experiments
-1. ## Identify critical nodes in the cancer network: Run the script `nibna_cancer_driver_script.py` to obtain the list of predicted coding drivers with mutations, coding drivers without mutations and non-coding drivers in the cancer network.
+1. ### Identify critical nodes in the cancer network: Run the script `nibna_cancer_driver_script.py` to obtain the list of predicted coding drivers with mutations, coding drivers without mutations and non-coding drivers in the cancer network.
 ```
 python3 nibna_cancer_driver_script.py
 ```
