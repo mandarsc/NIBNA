@@ -9,8 +9,6 @@ The following are the main steps involved in computing node importance,
 4. Compute node importance of each node in graph G using a centrality-based metric.
 5. Sort the coding genes in the cancer network in descending order of their importance score.
 
-## Steps to run experiments
-
 ## Prerequisites
 1. Make sure you have `python3` installed on your machine before running the experiments.
 2. Update the `DATA_DIR` and `OUT_DIR` variables in `nibna/utils.py` with the local path of your machine.
