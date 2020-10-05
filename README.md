@@ -11,8 +11,11 @@ The following are the main steps involved in computing node importance,
 
 ## Steps to run experiments
 
-### Prerequisite
-Make sure you have `python3` installed on your machine before running the experiments.
+## Prerequisites
+1. Make sure you have `python3` installed on your machine before running the experiments.
+2. Update the `DATA_DIR` and `OUT_DIR` variables in `nibna/utils.py` with the local path of your machine.
+
+## Experiments
 
 * ### Identify critical nodes in the cancer network: Execute the script `nibna_cancer_driver_script.py` to obtain the list of predicted coding drivers with mutations, coding drivers without mutations and non-coding drivers in the cancer network.
 ```
