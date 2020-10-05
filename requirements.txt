@@ -1,0 +1,10 @@
+seaborn
+numpy
+pandas
+matplotlib
+scipy
+python-louvain
+networkx
+
+
+

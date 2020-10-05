@@ -1,6 +1,7 @@
 # Standard libraries
 import datetime
 import logging
+import os
 from os.path import join
 from typing import List
 
@@ -66,6 +67,8 @@ if __name__ =="__main__":
     logger.info(f'Node importance threshold: {threshold_value}, threshold: {node_threshold}')
 
     critical_nodes = node_importance_df.iloc[:node_threshold].copy()
+    if not os.path.exists(join(OUT_DIR, 'CancerDriver', 'Cancer')):
+        os.makedirs(join(OUT_DIR, 'CancerDriver', 'Cancer'))
     critical_nodes.to_csv(join(OUT_DIR, 'CancerDriver', 'Cancer','critical_nodes.csv'))
     plot_node_importance(node_importance_df.importance.to_numpy(), node_threshold, 'cancer', join(OUT_DIR, 
                                                                                                   'CancerDriver', 'Cancer'))
@@ -81,7 +84,7 @@ if __name__ =="__main__":
         top_k_precision, top_k_recall = compute_top_k_precision_recall(cancer_drivers_dict['coding_drivers_mutations'],
                                                                        mRNAs_df, gold_standard_cgc)
         top_k_f1 = (2 * top_k_precision * top_k_recall)/(top_k_precision + top_k_recall + 1e-6)
-        plot_precision_recall_curves(top_k_precision, top_k_recall, top_k_f1, OUT_DIR)
+        plot_precision_recall_curves(top_k_precision, top_k_recall, top_k_f1, join(OUT_DIR, 'CancerDriver', 'Cancer'))
         performance_metrics_df = pd.DataFrame(zip(np.arange(top_k[-1]), top_k_precision, top_k_recall, top_k_f1), 
                                               columns=['k', 'precision', 'recall', 'f1'])
         performance_metrics_df.to_csv(join(OUT_DIR, 'CancerDriver', 'Cancer', 'performance_metrics_new.csv'))
@@ -103,7 +106,7 @@ if __name__ =="__main__":
 
     noncoding_candidate_cancer_drivers.loc[noncoding_candidate_cancer_drivers.node.isin(oncomir_mirna_drivers.iloc[:, 0]),
                                       'In OncomiR'] = 'Yes'
-    logger.info(f"Non-coding drivers validated using OncomiR {(noncoding_candidate_cancer_drivers['In OncomiR']=='Yes').sum()}")
+    logger.info(f"Non-coding drivers validated using OncomiR: {(noncoding_candidate_cancer_drivers['In OncomiR']=='Yes').sum()}")
     
     cancer_drivers_dict['coding_drivers_mutations'].to_csv(join(OUT_DIR, 'CancerDriver', 'Cancer', 'coding_candidate_drivers_mutations.csv'))
     cancer_drivers_dict['coding_drivers_no_mutations'].to_csv(join(OUT_DIR, 'CancerDriver', 'Cancer', 'coding_candidate_drivers_no_mutations.csv'))

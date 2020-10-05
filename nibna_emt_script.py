@@ -1,6 +1,7 @@
 # Standard libraries
 import datetime
 import logging
+import os
 from os.path import join
 from typing import List
 
@@ -41,6 +42,9 @@ if __name__ =="__main__":
     threshold_value = 1/len(G.nodes())
     node_threshold = (node_importance_df.importance > threshold_value).sum() # select nodes with importance score > 1/n
 
+    if not os.path.exists(join(OUT_DIR, 'EMT', 'Mes')):
+        os.makedirs(join(OUT_DIR, 'EMT', 'Mes'))
+
     logger.info(f'Node importance threshold: {threshold_value}, threshold: {node_threshold}')
     critical_nodes = node_importance_df.iloc[:node_threshold].copy()
     critical_nodes["Type"] = "coding"
@@ -64,8 +68,8 @@ if __name__ =="__main__":
     top_20_coding_drivers = critical_nodes.loc[critical_nodes.Type=="coding"].iloc[:20, :]
     top_20_noncoding_drivers = critical_nodes.loc[critical_nodes.Type=="non-coding"].iloc[:20, :]
     
-    top_20_coding_drivers.to_csv(join(OUT_DIR, 'EMT', 'Mes', 'top_20_coding_drives.csv'))
-    top_20_noncoding_drivers.to_csv(join(OUT_DIR, 'EMT', 'Mes', 'top_20_non_coding_drives.csv'))
+    top_20_coding_drivers.to_csv(join(OUT_DIR, 'EMT', 'Mes', 'top_20_coding_drivers.csv'))
+    top_20_noncoding_drivers.to_csv(join(OUT_DIR, 'EMT', 'Mes', 'top_20_non_coding_drivers.csv'))
     
     # Calculate p_value
     # Coding
@@ -82,4 +86,4 @@ if __name__ =="__main__":
     n_C = NUM_miR # number of miRNA
     n_A_B = len(validated_noncoding_candidate_drivers_mes) # number of drivers validated
     p_value = 1 - hypergeom.cdf(n_A_B, n_C, n_B, n_A)
-    logger.info("p_value for coding drivers of Mes: {0}".format(p_value))
+    logger.info("p_value for non-coding drivers of Mes: {0}".format(p_value))

@@ -1,6 +1,7 @@
 # Standard libraries
 import datetime
 import logging
+import os
 from os.path import join
 import pickle
 from typing import List
@@ -36,6 +37,9 @@ if __name__ =="__main__":
     common_noncoding_drivers = set()
 
     for subtype in cancer_subtypes:
+
+        if not os.path.exists(join(OUT_DIR, 'CancerSubtype', subtype)):
+            os.makedirs(join(OUT_DIR, 'CancerSubtype', subtype))
         logger.info(f'Cancer subtype: {subtype}')
         # Read Mes data and network
         filename = subtype.lower() + '_cancer_data.csv'

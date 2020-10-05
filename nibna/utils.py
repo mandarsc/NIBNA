@@ -14,8 +14,8 @@ NUM_miR = 1719
 NUM_mR = 20101
 NUM_TF = 839
 
-DATA_DIR = "/Users/mandar.chaudhary/Research Wednesday/NIBNA/Data/"
-OUT_DIR = "/Users/mandar.chaudhary/Research Wednesday/NIBNA/Output/"
+DATA_DIR = "/home/mandar/Data/NCSU/NIBNA/NIBNA/Data/"
+OUT_DIR = "/home/mandar/Data/NCSU/NIBNA/NIBNA/Output/"
 
 
 def configure_logging(logger):
