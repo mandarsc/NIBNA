@@ -14,7 +14,7 @@ The following are the main steps involved in computing node importance,
 ### Prerequisite
 Make sure you have `python3` installed on your machine before running the experiments.
 
-### Identify critical nodes in the cancer network: Execute the script `nibna_cancer_driver_script.py` to obtain the list of predicted coding drivers with mutations, coding drivers without mutations and non-coding drivers in the cancer network.
+* ### Identify critical nodes in the cancer network: Execute the script `nibna_cancer_driver_script.py` to obtain the list of predicted coding drivers with mutations, coding drivers without mutations and non-coding drivers in the cancer network.
 ```
 python3 nibna_cancer_driver_script.py
 ```
@@ -30,7 +30,7 @@ The script will load all the input data files and output results under the `NIBN
 
 The results are saved in a csv file saved in `Output` directory where each row indicates the number of top-k coding genes found by this approach.
 
-### Cancer subtype analysis: Execute the script `nibna_cancer_subtype_script.py` to obtain list of predicted cancer drivers for each cancer subtype.
+* ### Cancer subtype analysis: Execute the script `nibna_cancer_subtype_script.py` to obtain list of predicted cancer drivers for each cancer subtype.
 ```
 python3 nibna_cancer_subtype_script.py
 ```
@@ -43,7 +43,7 @@ The script will read the subtype-specific datasets and output the following file
 6. `noncoding_candidate_drivers_no_overlap.csv` contains list of predicted non-coding drivers which are only specific to the subtype.
 
 
-### EMT analysis: Execute the script `nibna_emt_script.py` to obtain the list of critical nodes in EMT analysis.
+* ### EMT analysis: Execute the script `nibna_emt_script.py` to obtain the list of critical nodes in EMT analysis.
 ```
 python3 nibna_emt_script.py
 ```
