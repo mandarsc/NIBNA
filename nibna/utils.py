@@ -164,9 +164,10 @@ def compute_mutation_count(coding_drivers_mutations: pd.DataFrame, mutation_subt
     for gene in coding_drivers_mutations.node.values:
         temp = mutation_subtypes.loc[mutation_subtypes.symbol == gene,].copy()
         if all(temp.Call.isna()):
-            subtype_mutation.append('nan')
+            subtype_mutation.append(np.nan)
             continue
         cancer_subtype_counts = temp.Call.value_counts()
+        cancer_subtype_counts = cancer_subtype_counts.sort_index()
         subtype_mutation.append(cancer_subtype_counts.index[np.argmax(cancer_subtype_counts)])
 
     coding_drivers_mutations['Subtype'] = subtype_mutation
